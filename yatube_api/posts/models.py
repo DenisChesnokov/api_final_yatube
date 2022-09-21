@@ -42,8 +42,9 @@ class Post(models.Model):
     def __str__(self):
         return self.text
 
+    """
     class Meta:
-        ordering = ["-pub_date"]
+        ordering = ["-pub_date"]"""
 
 
 class Comment(models.Model):
@@ -66,8 +67,9 @@ class Comment(models.Model):
         auto_now_add=True,
         db_index=True)
 
+    """
     class Meta:
-        ordering = ["-created"]
+        ordering = ["-created"]"""
 
 
 class Follow(models.Model):
@@ -84,3 +86,10 @@ class Follow(models.Model):
         on_delete=models.CASCADE,
         related_name='following'
     )
+
+    constraints = [
+        models.UniqueConstraint(
+            fields=['user', 'following'],
+            name='unique_user_following'
+        )
+    ]
