@@ -60,7 +60,7 @@ class FollowSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = ('user', 'following')
+        fields = ('id', 'user', 'following')
         model = Follow
 
         validators = [
@@ -71,10 +71,11 @@ class FollowSerializer(serializers.ModelSerializer):
             )
         ]
 
-    def validate_following(self, value):
-        if str(self.context['request'].user.username) == value.username:
-            print("Я тут")
+    def validate(self, data):
+        """Не совсем понял о чём речь про брать user из поля сериализатора
+        избавился от username"""
+        if self.context['request'].user == data['following']:
             raise serializers.ValidationError(
                 'Подписка на самого себя запрещена!'
             )
-        return value
+        return data

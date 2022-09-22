@@ -1,6 +1,8 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
+from rest_framework import filters
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import IsAuthenticated
 from posts.models import (
     Group,
     Post,
@@ -14,7 +16,7 @@ from .serializers import (
     FollowSerializer
 )
 
-from .permissions import AuthorOrReadOnly, ReadOnly, FollowPermission
+from .permissions import AuthorOrReadOnly
 
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
@@ -31,11 +33,6 @@ class PostViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    def get_permissions(self):
-        if self.action == 'retrieve':
-            return (ReadOnly(),)
-        return super().get_permissions()
-
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
@@ -48,26 +45,22 @@ class CommentViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
-        print(self.kwargs.get('post_id'))
-        post = get_object_or_404(
+        post_id = get_object_or_404(
             Post,
             pk=self.kwargs.get('post_id')
         )
 
         serializer.save(
             author=self.request.user,
-            post=post
+            post=post_id
         )
-
-    def get_permissions(self):
-        if self.action == 'retrieve':
-            return (ReadOnly(),)
-        return super().get_permissions()
 
 
 class FollowViewSet(viewsets.ModelViewSet):
     serializer_class = FollowSerializer
-    permission_classes = (FollowPermission,)
+    permission_classes = (IsAuthenticated,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('following__username',)
 
     def get_queryset(self):
 
@@ -75,13 +68,6 @@ class FollowViewSet(viewsets.ModelViewSet):
             user=self.request.user
         )
 
-        following_name = self.request.query_params.get('search')
-        print(following_name)
-
-        if following_name is not None:
-            queryset = queryset.filter(
-                following__username=following_name
-            )
         return queryset
 
     def perform_create(self, serializer):
