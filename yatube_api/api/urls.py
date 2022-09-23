@@ -5,13 +5,13 @@ from .views import (
     GroupViewSet,
     PostViewSet,
     CommentViewSet,
-    FollowViewSet
+    LightFollowViewSet
 )
 
 router = routers.DefaultRouter()
 router.register(r'v1/groups', GroupViewSet)
 router.register(r'v1/posts', PostViewSet)
-router.register(r'v1/follow', FollowViewSet, basename='follow')
+router.register(r'v1/follow', LightFollowViewSet, basename='follow')
 router.register(
     r'v1/posts/(?P<post_id>\d+)/comments',
     CommentViewSet,

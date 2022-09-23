@@ -72,8 +72,6 @@ class FollowSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, data):
-        """Не совсем понял о чём речь про брать user из поля сериализатора
-        избавился от username"""
         if self.context['request'].user == data['following']:
             raise serializers.ValidationError(
                 'Подписка на самого себя запрещена!'
